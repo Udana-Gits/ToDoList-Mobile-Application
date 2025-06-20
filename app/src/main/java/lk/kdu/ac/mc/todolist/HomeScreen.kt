@@ -6,27 +6,39 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.modifier.modifierLocalMapOf
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavController
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.SignInButton
 import lk.kdu.ac.mc.todolist.ui.theme.ToDoListTheme
+
+import androidx.compose.material3.ButtonDefaults //chatgpt for cutom button color change
+
 
 
 @Composable
 fun HomeScreen(navController: NavController){
 
     val name = "udana"
+
+
 
     ToDoListTheme {
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
@@ -35,7 +47,7 @@ fun HomeScreen(navController: NavController){
                 modifier = Modifier
                     .padding(innerPadding)
                     .fillMaxSize()
-                    .background(Color.Black)
+                    .background(Color.White)
                     .padding(top = 25.dp)
             ) {
                 // Align the greeting to the top-center
@@ -60,15 +72,22 @@ fun HomeScreen(navController: NavController){
                 ){
                     Button(onClick = {
                         navController.navigate("${Routes.listscreen}/$name") // navigation with aruguments
-                    }) {
-                        Text(text = "press to go to List Screen")
+                    },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.Blue //chatgpt for cutom button color change
+                        )
+                    ) {
+                        Text(text = "press to go to List Screen",
+                            color = Color.White
+                        )
                     }
                 }
-
             }
         }
     }
 }
+
+
 
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {
@@ -80,7 +99,7 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Left,
         ),
-        color = Color.White,
+        color = Color.Black,
         modifier = modifier.fillMaxWidth()
     )
 

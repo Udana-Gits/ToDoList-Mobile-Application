@@ -12,7 +12,20 @@
           "package_name": "lk.kdu.ac.mc.todolist"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "459886930592-kf887hs6p3hsn16ru3p596p9228ste2h.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "lk.kdu.ac.mc.todolist",
+            "certificate_hash": "31ba57471dfb5c89e875385f2063a4357aa37616"
+          }
+        },
+        {
+          "client_id": "459886930592-aaahgv2f4iu97maubdet1jvt0kng0hbn.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDa3VDS4AC5zSnkyxeNLSvLFEWUvrWfrXQ"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "459886930592-aaahgv2f4iu97maubdet1jvt0kng0hbn.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
