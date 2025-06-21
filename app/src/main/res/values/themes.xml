@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.ToDoList" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.ToDoList" parent="android:Theme.Material.Light.NoActionBar">
+
+        //add splash custom splash screen animation
+        //source : https://developer.android.com/develop/ui/views/launch/splash-screen#kts
+        //knowledge :  https://www.youtube.com/watch?v=YjtxfPkCzok
+
+        <item name="android:windowSplashScreenBackground">#000000</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/homesreengif</item> //animation in the drawabale folder
+        <item name="android:windowSplashScreenAnimationDuration">1000</item>
+    </style>
 </resources>
