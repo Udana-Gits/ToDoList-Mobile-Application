@@ -94,6 +94,7 @@ dependencies {
     implementation("com.google.firebase:firebase-auth-ktx:22.3.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3")
 
+    implementation("androidx.compose.runtime:runtime-livedata:1.8.3")
 
 
 

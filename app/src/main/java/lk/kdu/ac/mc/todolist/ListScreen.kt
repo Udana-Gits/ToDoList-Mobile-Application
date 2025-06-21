@@ -39,10 +39,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModelProvider
 import kotlinx.coroutines.launch
 
 import lk.kdu.ac.mc.todolist.pages.CalendarPage
 import lk.kdu.ac.mc.todolist.pages.MyLists
+import lk.kdu.ac.mc.todolist.pages.TodoViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -50,6 +52,11 @@ import lk.kdu.ac.mc.todolist.pages.MyLists
 fun ListScreen(navController: NavController, name: String) {
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+
+    //knowledge : https://www.youtube.com/watch?v=P3xQdINdrWY&list=PLgpnJydBcnPA5aNrlDxxKWSqAma7m3OIl&index=7, ChatGpt
+    //source : https://github.com/bimalkaf/JetpackCompose_Playground/tree/main/3_TodoApp
+    val todoViewModel: TodoViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+
 
     val navItemList = listOf(
         NavItem("Bar", Icons.Default.List),
@@ -115,7 +122,7 @@ fun ListScreen(navController: NavController, name: String) {
             ) { innerPadding ->
                 Box(modifier = Modifier.padding(innerPadding)) {
                     when (selectedIndex) {
-                        1 -> MyLists()
+                        1 -> MyLists(todoViewModel)
                         2 -> CalendarPage()
                     }
                 }
