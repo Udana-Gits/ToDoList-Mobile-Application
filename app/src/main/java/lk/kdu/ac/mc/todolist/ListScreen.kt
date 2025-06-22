@@ -2,6 +2,7 @@ package lk.kdu.ac.mc.todolist
 
 
 
+import android.app.Activity
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.IntentSenderRequest
@@ -85,16 +86,34 @@ import lk.kdu.ac.mc.todolist.pages.TodoViewModel
 import lk.kdu.ac.mc.todolist.sign_in_out.GoogleAuthUiClient
 import lk.kdu.ac.mc.todolist.sign_in_out.SignInResult
 
+import androidx.compose.runtime.LaunchedEffect
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.livedata.observeAsState
+
+
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ListScreen(navController: NavController, name: String) {
+
+
+
+
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
     //knowledge : https://www.youtube.com/watch?v=P3xQdINdrWY&list=PLgpnJydBcnPA5aNrlDxxKWSqAma7m3OIl&index=7, ChatGpt
     //source : https://github.com/bimalkaf/JetpackCompose_Playground/tree/main/3_TodoApp
-    val todoViewModel: TodoViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+    val todoViewModel: TodoViewModel = viewModel()
+
+
+    LaunchedEffect(Unit) {
+        todoViewModel.restoreTodosFromFirebase()
+    }
+
+    val todoList = todoViewModel.todoList.observeAsState()
 
 
     val navItemList = listOf(
@@ -120,7 +139,7 @@ fun ListScreen(navController: NavController, name: String) {
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartIntentSenderForResult(),
         onResult = { result ->
-            if (result.resultCode == android.app.Activity.RESULT_OK) {
+            if (result.resultCode == Activity.RESULT_OK) {
                 coroutineScope.launch {
                     val signInResult: SignInResult = googleAuthUiClient.signInWithIntent(result.data!!)
                     user = signInResult.data
@@ -268,8 +287,11 @@ fun ListScreen(navController: NavController, name: String) {
                         selected = isBackupEnabled,
                         onClick = {
                             isBackupEnabled = !isBackupEnabled
-                            // Optionally, handle backup logic here (e.g., update preferences or call cloud API)
-                        },
+                            if (isBackupEnabled) {
+                                todoList.value?.let { todoViewModel.backupTodosToFirebase(it) }
+                            }
+                        }
+                        ,
                         icon = {
                             Icon(
                                 imageVector = if (isBackupEnabled) Icons.Default.CloudDone else Icons.Default.CloudOff,

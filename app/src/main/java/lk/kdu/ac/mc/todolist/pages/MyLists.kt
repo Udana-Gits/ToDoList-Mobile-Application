@@ -5,10 +5,12 @@ package lk.kdu.ac.mc.todolist.pages
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -44,6 +46,8 @@ fun MyLists(viewModel: TodoViewModel) {
     var customCategories by remember { mutableStateOf(listOf<String>()) }
     val allCategories = remember { derivedStateOf { defaultCategories + customCategories } }
     var selectedCategory by remember { mutableStateOf("All") }
+
+
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize().padding(8.dp)) {
@@ -105,6 +109,11 @@ fun MyLists(viewModel: TodoViewModel) {
             onClick = { showSheet = true },
             containerColor = MaterialTheme.colorScheme.primary,
             modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp)
+                .border(
+                width = 2.dp,
+                color = Color.White,
+                    shape = RoundedCornerShape(12.dp)
+            )
         ) {
             Icon(Icons.Default.Add, contentDescription = "Add Todo", tint = Color.White)
         }

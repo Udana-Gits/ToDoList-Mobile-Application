@@ -5,6 +5,7 @@ package lk.kdu.ac.mc.todolist.db
 import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import lk.kdu.ac.mc.todolist.pages.Todo
 
@@ -20,4 +21,9 @@ interface TodoDao {
     @Query("Delete FROM Todo where id = :id")
     fun deleteTodo(id : Int)
 
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertIfNotExists(todo: Todo)
+
+
 }
+
