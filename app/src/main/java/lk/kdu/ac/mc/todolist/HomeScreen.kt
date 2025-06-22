@@ -58,11 +58,32 @@ import kotlinx.coroutines.launch
 
 
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+
+import coil.compose.AsyncImage
+
+import kotlinx.coroutines.launch
+
+import lk.kdu.ac.mc.todolist.ui.theme.ToDoListTheme
+
+
 @Composable
 fun HomeScreen(navController: NavController){
-
-
-
 
     //gif showing context , source : https://developer.android.com/social-and-messaging/guides/media-animated-gif
 
@@ -83,6 +104,7 @@ fun HomeScreen(navController: NavController){
     val googleAuthUiClient = remember { GoogleAuthUiClient(context, oneTapClient) }
     val coroutineScope = rememberCoroutineScope()
     var user by remember { mutableStateOf(googleAuthUiClient.getSignedInUser()) }
+    var showAccountMenu by remember { mutableStateOf(false) }
 
     val userName = user?.username?.split(" ")?.firstOrNull() ?: "Guest"
 
@@ -110,29 +132,109 @@ fun HomeScreen(navController: NavController){
                 modifier = Modifier
                     .padding(innerPadding)
                     .fillMaxSize()
-                    .background(Color.White)
-                    .padding(top = 25.dp)
+
+                    .padding(top = 15.dp)
                     .padding(bottom = 105.dp)
             ) {
-                // Align the greeting to the top-center
+                // Align the profile icon or image to the top end
+                // Greeting and Profile Box
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(10.dp)
+                        .background(Color(0xFFFFBE7C), shape = RoundedCornerShape(20.dp))
+                        .padding(10.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.logo), // replace with your actual image name
+                        contentDescription = "Greeting Image",
+                        modifier = Modifier
+                            .height(70.dp)  // set your desired height
+                            .width(275.dp)  // set your desired width
+                    )
+                    if (user != null) {
+                        AsyncImage(
+                            model = user!!.profilePictureUrl,
+                            contentDescription = "Profile Picture",
+                            modifier = Modifier
+                                .size(45.dp)
+                                .clip(CircleShape)
+                                .clickable { showAccountMenu = true }
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.AccountCircle,
+                            contentDescription = "Sign In Icon",
+                            tint = Color.Gray,
+                            modifier = Modifier
+                                .size(45.dp)
+                                .clickable {
+                                    coroutineScope.launch {
+                                        val intentSender = googleAuthUiClient.signIn()
+                                        intentSender?.let {
+                                            launcher.launch(IntentSenderRequest.Builder(it).build())
+                                        }
+                                    }
+                                }
+                        )
+                    }
+                }
+
+                if (showAccountMenu && user != null) {
+                    AlertDialog(
+                        onDismissRequest = { showAccountMenu = false },
+                        title = { Text("Account Options") },
+                        text = {
+                            Column {
+                                Text("Signed in as: ${user!!.username}")
+                            }
+                        },
+                        confirmButton = {
+                            TextButton(onClick = {
+                                coroutineScope.launch {
+                                    val intentSender = googleAuthUiClient.signIn()
+                                    intentSender?.let {
+                                        launcher.launch(IntentSenderRequest.Builder(it).build())
+                                    }
+                                }
+                                showAccountMenu = false
+                            }) {
+                                Text("Switch Account")
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = {
+                                coroutineScope.launch {
+                                    googleAuthUiClient.signOut()
+                                    user = null
+                                }
+                                showAccountMenu = false
+                            }) {
+                                Text("Sign Out")
+                            }
+                        }
+                    )
+                }
                 Greeting(
                     name = userName,
                     modifier = Modifier
-                        .align(Alignment.TopCenter)
-                        .padding(horizontal = 5.dp)
+                        .padding(top = 105.dp)
+                        .padding(horizontal = 15.dp)
                 )
                 // Align the creator to the bottom-center
                 Creator(
                     name = "Udana Senanayake",
                     id = "D/BCS/23/0018",
                     modifier = Modifier
-                        .padding(top = 70.dp)
-                        .padding(horizontal = 5.dp)
+                        .padding(top = 135.dp)
+                        .padding(horizontal = 20.dp)
                 )
                 Column(
-                    Modifier.fillMaxSize() .padding(horizontal = 16.dp),
+                    Modifier.fillMaxSize() .padding(top = 290.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
+
                 ){
                     //Coil Composable used to show images in Compose.
                     AsyncImage(
@@ -145,6 +247,8 @@ fun HomeScreen(navController: NavController){
                             .padding(bottom = 5.dp)
                     )
 
+                    Spacer(modifier = Modifier.height(100.dp))
+
                     Button(
                         onClick = {
                             navController.navigate("${Routes.listscreen}/$userName")
@@ -156,11 +260,10 @@ fun HomeScreen(navController: NavController){
                             .width(300.dp),               // Custom width
                         shape = RoundedCornerShape(20.dp), // Rounded corners
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color.Blue
                         )
                     ) {
                         Text(
-                            text = "My Do Lists",
+                            text = "Go To Lists",
                             color = Color.White,
                             style = TextStyle(
                                 fontSize = 25.sp,
@@ -168,63 +271,6 @@ fun HomeScreen(navController: NavController){
                                 textAlign = TextAlign.Left,
                             )
                         )
-                    }
-                    Spacer(modifier = Modifier.height(30.dp))
-
-                    if (user != null) {
-                        AsyncImage(
-                            model = user!!.profilePictureUrl,
-                            contentDescription = "Profile Picture",
-                            modifier = Modifier
-                                .height(80.dp)
-                                .width(80.dp)
-                                .background(Color.Gray, shape = RoundedCornerShape(40.dp))
-                        )
-
-                        // Show username
-                        Text(
-                            text = user!!.username ?: "User",
-                            style = TextStyle(
-                                fontSize = 20.sp,
-                                fontWeight = FontWeight.Medium,
-                                textAlign = TextAlign.Center,
-                            ),
-                            modifier = Modifier
-                                .padding(top = 8.dp)
-                                .fillMaxWidth()
-                        )
-
-                        Button(
-                            onClick = {
-                                coroutineScope.launch {
-                                    googleAuthUiClient.signOut()
-                                    user = null
-                                }
-                            },
-                            modifier = Modifier
-                                .padding(top = 10.dp)
-                                .height(50.dp)
-                                .width(200.dp)
-                        ) {
-                            Text("Sign Out")
-                        }
-                    } else {
-                        Button(
-                            onClick = {
-                                coroutineScope.launch {
-                                    val intentSender = googleAuthUiClient.signIn()
-                                    intentSender?.let {
-                                        launcher.launch(IntentSenderRequest.Builder(it).build())
-                                    }
-                                }
-                            },
-                            modifier = Modifier
-                                .padding(top = 10.dp)
-                                .height(50.dp)
-                                .width(200.dp)
-                        ) {
-                            Text("Sign In with Google")
-                        }
                     }
 
                 }
@@ -239,14 +285,14 @@ fun HomeScreen(navController: NavController){
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {
     Text(
-        text = "Welcome to $name's \nToDoList!",
+        text = "Welcome to $name's ToDoList!",
 
         style = TextStyle(
-            fontSize = 35.sp,
+            fontSize = 30.sp,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Left,
+            color = Color(0xFF964B00),
         ),
-        color = Color.Black,
         modifier = modifier.fillMaxWidth()
     )
 
@@ -258,13 +304,12 @@ fun Creator(name: String ,id: String , modifier: Modifier = Modifier) {
         text = "This app was created by $name - $id",
 
         style = TextStyle(
-            fontSize = 18.sp,
+            fontSize = 12.sp,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Left,
         ),
 
-        color = Color.Blue,
-        //color = Color(0xFFADFF2F),
+        color = Color(0xFF964B00),
         modifier = modifier.fillMaxWidth()
     )
 
