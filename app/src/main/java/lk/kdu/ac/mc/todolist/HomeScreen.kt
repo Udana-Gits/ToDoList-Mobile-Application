@@ -147,12 +147,13 @@ fun HomeScreen(navController: NavController){
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Greeting(
-                        name = userName,
+                    Image(
+                        painter = painterResource(id = R.drawable.logo), // replace with your actual image name
+                        contentDescription = "Greeting Image",
                         modifier = Modifier
-                            .weight(1f)
+                            .height(70.dp)  // set your desired height
+                            .width(275.dp)  // set your desired width
                     )
-
                     if (user != null) {
                         AsyncImage(
                             model = user!!.profilePictureUrl,
@@ -168,7 +169,7 @@ fun HomeScreen(navController: NavController){
                             contentDescription = "Sign In Icon",
                             tint = Color.Gray,
                             modifier = Modifier
-                                .size(40.dp)
+                                .size(45.dp)
                                 .clickable {
                                     coroutineScope.launch {
                                         val intentSender = googleAuthUiClient.signIn()
@@ -216,19 +217,24 @@ fun HomeScreen(navController: NavController){
                         }
                     )
                 }
-
+                Greeting(
+                    name = userName,
+                    modifier = Modifier
+                        .padding(top = 105.dp)
+                        .padding(horizontal = 15.dp)
+                )
                 // Align the creator to the bottom-center
                 Creator(
                     name = "Udana Senanayake",
                     id = "D/BCS/23/0018",
                     modifier = Modifier
-                        .padding(top = 110.dp)
-                        .padding(horizontal = 15.dp)
+                        .padding(top = 135.dp)
+                        .padding(horizontal = 20.dp)
                 )
                 Column(
-                    Modifier.fillMaxSize() .padding(horizontal = 16.dp),
+                    Modifier.fillMaxSize() .padding(top = 290.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
+
                 ){
                     //Coil Composable used to show images in Compose.
                     AsyncImage(
@@ -240,6 +246,8 @@ fun HomeScreen(navController: NavController){
                             .fillMaxWidth()
                             .padding(bottom = 5.dp)
                     )
+
+                    Spacer(modifier = Modifier.height(100.dp))
 
                     Button(
                         onClick = {
@@ -277,13 +285,13 @@ fun HomeScreen(navController: NavController){
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {
     Text(
-        text = "Welcome to $name's \nToDoList!",
+        text = "Welcome to $name's ToDoList!",
 
         style = TextStyle(
-            fontSize = 35.sp,
+            fontSize = 30.sp,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Left,
-            color = Color.White
+            color = Color(0xFF964B00),
         ),
         modifier = modifier.fillMaxWidth()
     )

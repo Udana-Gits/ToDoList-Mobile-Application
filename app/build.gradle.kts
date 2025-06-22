@@ -4,6 +4,8 @@ plugins {
     alias(libs.plugins.kotlin.compose)
 
     id("com.google.gms.google-services")
+    //kapt id
+    id("kotlin-kapt")
 }
 
 android {
@@ -95,6 +97,23 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3")
 
     implementation("androidx.compose.runtime:runtime-livedata:1.8.3")
+
+
+    //setup depedencies for room database
+    //(source : https://developer.android.com/jetpack/androidx/releases/room)
+    //Knowlage : https://www.youtube.com/watch?v=sWOmlDvz_3U&list=PLgpnJydBcnPA5aNrlDxxKWSqAma7m3OIl&index=8
+
+    val room_version = "2.6.1"
+
+    implementation("androidx.room:room-runtime:$room_version")
+    annotationProcessor("androidx.room:room-compiler:$room_version")
+
+    // To use Kotlin annotation processing tool (kapt)
+    kapt("androidx.room:room-compiler:$room_version")
+
+    //dependency for extemded icons more icons
+    implementation("androidx.compose.material:material-icons-extended")
+
 
 
 

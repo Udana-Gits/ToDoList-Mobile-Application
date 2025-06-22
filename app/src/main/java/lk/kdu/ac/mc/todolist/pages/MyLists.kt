@@ -3,6 +3,7 @@
 
 package lk.kdu.ac.mc.todolist.pages
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -35,6 +36,7 @@ fun MyLists(viewModel: TodoViewModel) {
     val coroutineScope = rememberCoroutineScope()
     var showSheet by remember { mutableStateOf(false) }
     var inputText by remember { mutableStateOf("") }
+    var searchText by remember { mutableStateOf("") }
 
     val sheetState = rememberModalBottomSheetState()
 
@@ -45,6 +47,14 @@ fun MyLists(viewModel: TodoViewModel) {
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize().padding(8.dp)) {
+
+            OutlinedTextField(
+                value = searchText,
+                onValueChange = { searchText = it },
+                label = { Text("Search tasks") },
+                shape = RoundedCornerShape(30.dp),
+                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
+            )
 
             // Category Filter Bar
             LazyRow(
@@ -63,19 +73,23 @@ fun MyLists(viewModel: TodoViewModel) {
 
             // Filter & Sort
             val filteredList = todoList?.filter {
-                selectedCategory == "All" || it.category == selectedCategory
+                (selectedCategory == "All" || it.category == selectedCategory) &&
+                        (it.title.contains(searchText, ignoreCase = true) || it.topic.contains(searchText, ignoreCase = true))
             }?.sortedWith(compareBy(
                 { it.taskDate?.after(Date()) != true },
                 { it.taskDate ?: Date(Long.MAX_VALUE) }
             )) ?: emptyList()
 
             if (filteredList.isEmpty()) {
-                Text(
-                    modifier = Modifier.fillMaxWidth().padding(top = 50.dp),
-                    textAlign = TextAlign.Center,
-                    text = "No items yet",
-                    fontSize = 16.sp
-                )
+                Box(modifier = Modifier.fillMaxSize()) {
+                    Image(
+                        painter = painterResource(id = R.drawable.emptytasks),
+                        contentDescription = "Empty tasks Image",
+                        modifier = Modifier
+                            .size(250.dp)
+                            .align(Alignment.Center) // Now this works correctly
+                    )
+                }
             } else {
                 LazyColumn(content = {
                     itemsIndexed(filteredList) { _: Int, item ->
@@ -165,7 +179,6 @@ fun MyLists(viewModel: TodoViewModel) {
                             Text("Select Task Date")
                         }
                     }
-
 
                     Spacer(modifier = Modifier.height(16.dp))
 
