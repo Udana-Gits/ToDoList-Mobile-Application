@@ -17,35 +17,40 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.modifier.modifierLocalMapOf
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+//---------------------------------------------------------------------
+
+
+//as alignment measurements
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.viewinterop.AndroidView
 
 //navigation
 import androidx.navigation.NavController
+//---------------------------------------------------------------------
 
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.common.SignInButton
 import lk.kdu.ac.mc.todolist.ui.theme.ToDoListTheme
 
 
 //button
 import androidx.compose.material3.ButtonDefaults //chatgpt for custom button color change
+//---------------------------------------------------------------------
 
 //gif showing context
 import coil.ImageLoader
 import coil.compose.AsyncImage
 import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
+//---------------------------------------------------------------------
 
 //import from package lk.kdu.ac.mc.todolist.sign_in_out
 import lk.kdu.ac.mc.todolist.sign_in_out.GoogleAuthUiClient
 import lk.kdu.ac.mc.todolist.sign_in_out.SignInResult
+//---------------------------------------------------------------------
+
 
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -55,31 +60,24 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import com.google.android.gms.auth.api.identity.Identity
 import kotlinx.coroutines.launch
+//---------------------------------------------------------------------
 
-
-
-import androidx.activity.compose.rememberLauncherForActivityResult
+// for ui modification to put sign in button inside the logo heder
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+//---------------------------------------------------------------------
 
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+//for layout consistancy among diffrent devices insted of hard corded padding use scrollables
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
+//---------------------------------------------------------------------
 
-import coil.compose.AsyncImage
 
-import kotlinx.coroutines.launch
-
-import lk.kdu.ac.mc.todolist.ui.theme.ToDoListTheme
 
 
 @Composable
@@ -132,54 +130,108 @@ fun HomeScreen(navController: NavController){
                 modifier = Modifier
                     .padding(innerPadding)
                     .fillMaxSize()
-
-                    .padding(top = 15.dp)
-                    .padding(bottom = 105.dp)
+                    .padding(bottom = 80.dp)
             ) {
-                // Align the profile icon or image to the top end
-                // Greeting and Profile Box
-                Row(
+                Column(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(10.dp)
-                        .background(Color(0xFFFFBE7C), shape = RoundedCornerShape(20.dp))
-                        .padding(10.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                        .padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.logo), // replace with your actual image name
-                        contentDescription = "Greeting Image",
+                    // Align the profile icon or image to the top end
+                    // Greeting and Profile Box
+                    Row(
                         modifier = Modifier
-                            .height(70.dp)  // set your desired height
-                            .width(275.dp)  // set your desired width
-                    )
-                    if (user != null) {
-                        AsyncImage(
-                            model = user!!.profilePictureUrl,
-                            contentDescription = "Profile Picture",
+                            .fillMaxWidth()
+                            .background(Color(0xFFFFBE7C), shape = RoundedCornerShape(20.dp))
+                            .padding(10.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.logo), // replace with your actual image name
+                            contentDescription = "Greeting Image",
                             modifier = Modifier
-                                .size(45.dp)
-                                .clip(CircleShape)
-                                .clickable { showAccountMenu = true }
+                                .height(70.dp)  // set your desired height
+                                .width(275.dp)  // set your desired width
                         )
-                    } else {
-                        Icon(
-                            imageVector = Icons.Default.AccountCircle,
-                            contentDescription = "Sign In Icon",
-                            tint = Color.Gray,
-                            modifier = Modifier
-                                .size(45.dp)
-                                .clickable {
-                                    coroutineScope.launch {
-                                        val intentSender = googleAuthUiClient.signIn()
-                                        intentSender?.let {
-                                            launcher.launch(IntentSenderRequest.Builder(it).build())
+                        if (user != null) {
+                            AsyncImage(
+                                model = user!!.profilePictureUrl,
+                                contentDescription = "Profile Picture",
+                                modifier = Modifier
+                                    .size(45.dp)
+                                    .clip(CircleShape)
+                                    .clickable { showAccountMenu = true }
+                            )
+                        } else {
+                            Icon(
+                                imageVector = Icons.Default.AccountCircle,
+                                contentDescription = "Sign In Icon",
+                                tint = Color.Gray,
+                                modifier = Modifier
+                                    .size(45.dp)
+                                    .clickable {
+                                        coroutineScope.launch {
+                                            val intentSender = googleAuthUiClient.signIn()
+                                            intentSender?.let {
+                                                launcher.launch(IntentSenderRequest.Builder(it).build())
+                                            }
                                         }
                                     }
-                                }
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Greeting(
+                        name = userName,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Creator(
+                        name = "Udana Senanayake",
+                        id = "D/BCS/23/0018",
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    Spacer(modifier = Modifier.weight(1f))
+                    //Coil Composable used to show images in Compose.
+                    AsyncImage(
+                        model = R.drawable.homesreengif,
+                        contentDescription = "Home GIF",
+                        imageLoader = gifEnabledLoader,
+                        modifier = Modifier
+                            .height(275.dp)
+                            .fillMaxWidth()
+                            .padding(bottom = 5.dp)
+                    )
+
+                    Spacer(modifier = Modifier.weight(1f))
+
+                    Button(
+                        onClick = {
+                            navController.navigate("${Routes.listscreen}/$userName")
+                        },
+                        modifier = Modifier
+                            .height(60.dp)
+                            .width(300.dp),
+                        shape = RoundedCornerShape(20.dp),
+                        colors = ButtonDefaults.buttonColors()
+                    ) {
+                        Text(
+                            text = "Go To Lists",
+                            color = Color.White,
+                            style = TextStyle(
+                                fontSize = 25.sp,
+                                fontWeight = FontWeight.Bold,
+                                textAlign = TextAlign.Center
+                            )
                         )
                     }
+                    Spacer(modifier = Modifier.height(20.dp))
                 }
 
                 if (showAccountMenu && user != null) {
@@ -216,63 +268,6 @@ fun HomeScreen(navController: NavController){
                             }
                         }
                     )
-                }
-                Greeting(
-                    name = userName,
-                    modifier = Modifier
-                        .padding(top = 105.dp)
-                        .padding(horizontal = 15.dp)
-                )
-                // Align the creator to the bottom-center
-                Creator(
-                    name = "Udana Senanayake",
-                    id = "D/BCS/23/0018",
-                    modifier = Modifier
-                        .padding(top = 135.dp)
-                        .padding(horizontal = 20.dp)
-                )
-                Column(
-                    Modifier.fillMaxSize() .padding(top = 290.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-
-                ){
-                    //Coil Composable used to show images in Compose.
-                    AsyncImage(
-                        model = R.drawable.homesreengif,
-                        contentDescription = "Home GIF",
-                        imageLoader = gifEnabledLoader,
-                        modifier = Modifier
-                            .height(275.dp)
-                            .fillMaxWidth()
-                            .padding(bottom = 5.dp)
-                    )
-
-                    Spacer(modifier = Modifier.height(100.dp))
-
-                    Button(
-                        onClick = {
-                            navController.navigate("${Routes.listscreen}/$userName")
-                        },
-                        modifier = Modifier
-                            .padding(top = 75.dp)         // Top padding
-                            .padding(bottom = 0.dp)
-                            .height(60.dp)                // Custom height
-                            .width(300.dp),               // Custom width
-                        shape = RoundedCornerShape(20.dp), // Rounded corners
-                        colors = ButtonDefaults.buttonColors(
-                        )
-                    ) {
-                        Text(
-                            text = "Go To Lists",
-                            color = Color.White,
-                            style = TextStyle(
-                                fontSize = 25.sp,
-                                fontWeight = FontWeight.Bold,
-                                textAlign = TextAlign.Left,
-                            )
-                        )
-                    }
-
                 }
             }
         }

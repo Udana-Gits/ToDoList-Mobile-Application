@@ -13,12 +13,15 @@ import androidx.room.PrimaryKey
 data class Todo(
     @PrimaryKey(autoGenerate = true)
     var id: Int = 0,
-    var title: String,
-    var topic: String,
+    var title: String = "",
+    var topic: String = "",
     var category: String = "No Category",
-    var createdAt: Date,
+    var createdAt: Date = Date(),
     var taskDate: Date? = null
 )
+
+
+
 
 
 

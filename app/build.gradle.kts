@@ -77,6 +77,11 @@ dependencies {
     // Add the dependency for the Firebase Authentication library
     // When using the BoM, you don't specify versions in Firebase library dependencies
     implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-auth-ktx")
+    implementation("com.google.firebase:firebase-database-ktx")
+
+
+
 
     // Also add the dependencies for the Credential Manager libraries and specify their versions
     implementation("androidx.credentials:credentials:1.3.0")
@@ -111,10 +116,18 @@ dependencies {
     // To use Kotlin annotation processing tool (kapt)
     kapt("androidx.room:room-compiler:$room_version")
 
+
+    implementation("androidx.room:room-ktx:2.6.1")
+
     //dependency for extemded icons more icons
     implementation("androidx.compose.material:material-icons-extended")
 
+    //lottie files for import animations
+    val lottieVersion = "3.4.0"
+    implementation("com.airbnb.android:lottie:$lottieVersion")
 
+    //data store implementation for store backup on off  toggle switch state
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
 
 
 }

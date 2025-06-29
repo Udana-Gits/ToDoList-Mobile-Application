@@ -21,7 +21,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
@@ -32,10 +31,19 @@ import java.util.*
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyLists(viewModel: TodoViewModel) {
+
+    //to update existing tasks
+    var editingTodo by remember { mutableStateOf<Todo?>(null) }
+
+
     val todoList by viewModel.todoList.observeAsState()
     val coroutineScope = rememberCoroutineScope()
     var showSheet by remember { mutableStateOf(false) }
-    var inputText by remember { mutableStateOf("") }
+    var inputText by remember { mutableStateOf(editingTodo?.title ?: "") }
+    var topicText by remember { mutableStateOf(editingTodo?.topic ?: "") }
+
+    var selectedBottomSheetCategory by remember { mutableStateOf(editingTodo?.category ?: "No Category") }
+
     var searchText by remember { mutableStateOf("") }
 
     val sheetState = rememberModalBottomSheetState()
@@ -44,6 +52,11 @@ fun MyLists(viewModel: TodoViewModel) {
     var customCategories by remember { mutableStateOf(listOf<String>()) }
     val allCategories = remember { derivedStateOf { defaultCategories + customCategories } }
     var selectedCategory by remember { mutableStateOf("All") }
+
+
+
+
+
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize().padding(8.dp)) {
@@ -70,7 +83,6 @@ fun MyLists(viewModel: TodoViewModel) {
                     )
                 }
             }
-
             // Filter & Sort
             val filteredList = todoList?.filter {
                 (selectedCategory == "All" || it.category == selectedCategory) &&
@@ -83,19 +95,20 @@ fun MyLists(viewModel: TodoViewModel) {
             if (filteredList.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize()) {
                     Image(
-                        painter = painterResource(id = R.drawable.emptytasks),
+                        painter = painterResource(id = R.drawable.emptygirl),
                         contentDescription = "Empty tasks Image",
                         modifier = Modifier
-                            .size(250.dp)
+                            .size(350.dp)
                             .align(Alignment.Center) // Now this works correctly
                     )
                 }
             } else {
                 LazyColumn(content = {
                     itemsIndexed(filteredList) { _: Int, item ->
-                        TodoItem(item = item, onDelete = {
-                            viewModel.deleteTodo(item.id)
-                        })
+                        TodoItem(item = item,
+                            onDelete = { viewModel.deleteTodo(item.id) },
+                            onEdit = { editingTodo = item; showSheet = true }
+                        )
                     }
                 })
             }
@@ -103,23 +116,33 @@ fun MyLists(viewModel: TodoViewModel) {
 
         FloatingActionButton(
             onClick = { showSheet = true },
-            containerColor = MaterialTheme.colorScheme.primary,
+            containerColor = MaterialTheme.colorScheme.contentColorFor(MaterialTheme.colorScheme.primary),
             modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp)
         ) {
-            Icon(Icons.Default.Add, contentDescription = "Add Todo", tint = Color.White)
+            Icon(Icons.Default.Add, contentDescription = "Add Todo", tint = MaterialTheme.colorScheme.primary)
         }
+
+        LaunchedEffect(showSheet) {
+            if (showSheet) {
+                inputText = editingTodo?.title ?: ""
+                topicText = editingTodo?.topic ?: ""
+                selectedBottomSheetCategory = editingTodo?.category ?: "No Category"
+            }
+        }
+
+
 
         if (showSheet) {
             ModalBottomSheet(
                 onDismissRequest = { showSheet = false },
                 sheetState = sheetState
             ) {
-                var topicText by remember { mutableStateOf("") }
                 val categoryOptions = defaultCategories.drop(1) + customCategories + "+ Create New"
-                var selectedBottomSheetCategory by remember { mutableStateOf("No Category") }
                 var expanded by remember { mutableStateOf(false) }
 
-                val datePickerState = rememberDatePickerState()
+                val datePickerState = rememberDatePickerState(
+                    initialSelectedDateMillis = editingTodo?.taskDate?.time
+                )
                 var showDatePicker by remember { mutableStateOf(false) }
                 var showNewCategoryDialog by remember { mutableStateOf(false) }
                 var newCategoryName by remember { mutableStateOf("") }
@@ -184,26 +207,41 @@ fun MyLists(viewModel: TodoViewModel) {
 
                     Button(
                         onClick = {
-                            if (inputText.isNotBlank()) {
-                                val taskDate = datePickerState.selectedDateMillis?.let { Date(it) }
+                            val taskDate = datePickerState.selectedDateMillis?.let { Date(it) }
+
+                            if (editingTodo != null) {
+                                viewModel.updateTodo(
+                                    editingTodo!!.copy(
+                                        title = inputText,
+                                        topic = topicText,
+                                        category = selectedBottomSheetCategory,
+                                        taskDate = taskDate
+                                    )
+                                )
+                            } else if (inputText.isNotBlank()) {
                                 viewModel.addTodo(
                                     inputText,
                                     topicText,
                                     selectedBottomSheetCategory,
                                     taskDate
                                 )
-                                inputText = ""
-                                topicText = ""
-                                selectedBottomSheetCategory = "No Category"
-                                coroutineScope.launch {
-                                    sheetState.hide()
-                                    showSheet = false
-                                }
                             }
-                        },
+
+                            // Reset and close sheet
+                            inputText = ""
+                            topicText = ""
+                            selectedBottomSheetCategory = "No Category"
+                            editingTodo = null
+                            coroutineScope.launch {
+                                sheetState.hide()
+                                showSheet = false
+                            }
+                        }
+                        ,
                         modifier = Modifier.align(Alignment.End)
                     ) {
-                        Text("Add")
+                        //change button accoding to the update or add (chatgpt)
+                        Text(if (editingTodo != null) "Update" else "Add")
                     }
                 }
 
@@ -262,7 +300,7 @@ fun MyLists(viewModel: TodoViewModel) {
 }
 
 @Composable
-fun TodoItem(item: Todo, onDelete: () -> Unit) {
+fun TodoItem(item: Todo, onDelete: () -> Unit, onEdit: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -273,11 +311,35 @@ fun TodoItem(item: Todo, onDelete: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = "" + SimpleDateFormat("HH:mm:ss, dd/MM", Locale.ENGLISH).format(item.createdAt),
-                fontSize = 12.sp,
-                color = Color.LightGray
-            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "" + SimpleDateFormat("HH:mm:ss, dd/MM", Locale.ENGLISH).format(item.createdAt),
+                    fontSize = 12.sp,
+                    color = Color.LightGray
+                )
+                Row {
+                    IconButton(onClick = onEdit) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.outline_edit_square_24),
+                            contentDescription = "Edit",
+                            tint = Color.White
+                        )
+                    }
+                    IconButton(onClick = onDelete) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.baseline_delete_24),
+                            contentDescription = "Delete",
+                            tint = Color.White
+                        )
+                    }
+                }
+            }
+
             Text(
                 text = item.topic,
                 fontSize = 25.sp,
@@ -301,12 +363,7 @@ fun TodoItem(item: Todo, onDelete: () -> Unit) {
                 )
             }
         }
-        IconButton(onClick = onDelete) {
-            Icon(
-                painter = painterResource(id = R.drawable.baseline_delete_24),
-                contentDescription = "Delete",
-                tint = Color.White
-            )
-        }
+
+
     }
 }
