@@ -122,7 +122,12 @@ dependencies {
     //dependency for extemded icons more icons
     implementation("androidx.compose.material:material-icons-extended")
 
+    //lottie files for import animations
+    val lottieVersion = "3.4.0"
+    implementation("com.airbnb.android:lottie:$lottieVersion")
 
+    //data store implementation for store backup on off  toggle switch state
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
 
 
 }

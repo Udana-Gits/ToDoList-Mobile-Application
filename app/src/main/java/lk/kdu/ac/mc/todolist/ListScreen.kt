@@ -1,7 +1,6 @@
 package lk.kdu.ac.mc.todolist
 
 
-
 import android.app.Activity
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -15,7 +14,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -39,7 +37,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 
@@ -57,7 +54,6 @@ import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -75,7 +71,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.ViewModelProvider
 import coil.compose.AsyncImage
 import com.google.android.gms.auth.api.identity.Identity
 import kotlinx.coroutines.launch
@@ -88,7 +83,6 @@ import lk.kdu.ac.mc.todolist.sign_in_out.SignInResult
 
 import androidx.compose.runtime.LaunchedEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.livedata.observeAsState
 
 
@@ -267,36 +261,23 @@ fun ListScreen(navController: NavController, name: String) {
                     Spacer(modifier = Modifier.height(20.dp))
 
                     NavigationDrawerItem(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 20.dp, vertical = 4.dp),
-
                         label = {
-                            Text(if (isBackupEnabled) "Turn off backup" else "Turn on backup",
-
-                                style = TextStyle(
-                                    fontSize = 20.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    textAlign = TextAlign.Left,
-                                    color = Color(0xFF964B00),
-                                ),
-                                modifier = Modifier.fillMaxWidth()
-                                    .padding(start = 16.dp)
-                                )
+                            Text(
+                                if (todoViewModel.isBackupEnabled.value) "Turn off backup" else "Turn on backup",
+                                style = TextStyle(fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                            )
                         },
-                        selected = isBackupEnabled,
+                        selected = todoViewModel.isBackupEnabled.value,
                         onClick = {
-                            isBackupEnabled = !isBackupEnabled
-                            if (isBackupEnabled) {
+                            todoViewModel.isBackupEnabled.value = !todoViewModel.isBackupEnabled.value
+                            if (todoViewModel.isBackupEnabled.value) {
                                 todoList.value?.let { todoViewModel.backupTodosToFirebase(it) }
                             }
-                        }
-                        ,
+                        },
                         icon = {
                             Icon(
-                                imageVector = if (isBackupEnabled) Icons.Default.CloudDone else Icons.Default.CloudOff,
-                                contentDescription = null,
-                                tint = Color(0xFF964B00)
+                                imageVector = if (todoViewModel.isBackupEnabled.value) Icons.Default.CloudDone else Icons.Default.CloudOff,
+                                contentDescription = null
                             )
                         }
                     )
@@ -332,7 +313,6 @@ fun ListScreen(navController: NavController, name: String) {
             }
         ) {
             Scaffold(
-
                 //Bottom navigation bar (source : https://www.youtube.com/watch?v=O9csfKW3dZ4&list=PLgpnJydBcnPA5aNrlDxxKWSqAma7m3OIl&index=13)
                 bottomBar = {
                     NavigationBar {
