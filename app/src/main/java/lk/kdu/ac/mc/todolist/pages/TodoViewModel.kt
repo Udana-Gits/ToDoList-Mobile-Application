@@ -18,8 +18,9 @@ import java.util.Date
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.database.FirebaseDatabase
+import android.content.Context
 
-class TodoViewModel : ViewModel() {
+class TodoViewModel(context: Context) : ViewModel() {
 
     val todoDao = MainApplication.todoDatabase.getTodoDao()
 
@@ -29,8 +30,26 @@ class TodoViewModel : ViewModel() {
     val userEmail = Firebase.auth.currentUser?.email
     val userId = userEmail?.replace(".", "_")  // Firebase paths can't use "."
 
+
+
+    private val backupPreferences = BackupPreferences(context)
     var isBackupEnabled = mutableStateOf(false)  // Add this at the top inside the ViewModel
 
+    init {
+        viewModelScope.launch {
+            backupPreferences.backupEnabledFlow.collect { enabled ->
+                isBackupEnabled.value = enabled
+            }
+        }
+    }
+
+    fun toggleBackupEnabled() {
+        viewModelScope.launch {
+            val newValue = !isBackupEnabled.value
+            isBackupEnabled.value = newValue
+            backupPreferences.setBackupEnabled(newValue)
+        }
+    }
 
 
 

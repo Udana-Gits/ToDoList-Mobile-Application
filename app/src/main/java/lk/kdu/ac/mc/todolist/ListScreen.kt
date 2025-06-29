@@ -84,8 +84,7 @@ import lk.kdu.ac.mc.todolist.sign_in_out.SignInResult
 import androidx.compose.runtime.LaunchedEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.runtime.livedata.observeAsState
-
-
+import lk.kdu.ac.mc.todolist.pages.TodoViewModelFactory
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -100,7 +99,11 @@ fun ListScreen(navController: NavController, name: String) {
 
     //knowledge : https://www.youtube.com/watch?v=P3xQdINdrWY&list=PLgpnJydBcnPA5aNrlDxxKWSqAma7m3OIl&index=7, ChatGpt
     //source : https://github.com/bimalkaf/JetpackCompose_Playground/tree/main/3_TodoApp
-    val todoViewModel: TodoViewModel = viewModel()
+    //val todoViewModel: TodoViewModel = viewModel() remove it and updated beacuse need to store ststus of toogle button but using normal view model cannot pass a argument
+    val context = LocalContext.current//Gives  access to the Android context inside a Composabl
+    val todoViewModel: TodoViewModel = viewModel(
+        factory = TodoViewModelFactory(context.applicationContext)
+    )
 
 
     LaunchedEffect(Unit) {
@@ -116,7 +119,7 @@ fun ListScreen(navController: NavController, name: String) {
         NavItem("Calendar", Icons.Default.DateRange)
     )
 
-    val context = LocalContext.current //Gives  access to the Android context inside a Composabl
+
 
 
     //----------------------------------------------------------------------------------
@@ -145,7 +148,6 @@ fun ListScreen(navController: NavController, name: String) {
         }
     )
     //----------------------------------------------------------------------------------
-    var isBackupEnabled by remember { mutableStateOf(false) }
 
 
 
@@ -192,7 +194,7 @@ fun ListScreen(navController: NavController, name: String) {
                                         .clip(CircleShape)
                                 )
                                 Icon(
-                                    imageVector = if (isBackupEnabled) Icons.Default.CloudDone else Icons.Default.CloudOff,
+                                    imageVector = if (todoViewModel.isBackupEnabled.value) Icons.Default.CloudDone else Icons.Default.CloudOff,
                                     contentDescription = null,
                                     tint = Color(0xFF964B00),
                                     modifier = Modifier
@@ -269,7 +271,7 @@ fun ListScreen(navController: NavController, name: String) {
                         },
                         selected = todoViewModel.isBackupEnabled.value,
                         onClick = {
-                            todoViewModel.isBackupEnabled.value = !todoViewModel.isBackupEnabled.value
+                            todoViewModel.toggleBackupEnabled()
                             if (todoViewModel.isBackupEnabled.value) {
                                 todoList.value?.let { todoViewModel.backupTodosToFirebase(it) }
                             }
