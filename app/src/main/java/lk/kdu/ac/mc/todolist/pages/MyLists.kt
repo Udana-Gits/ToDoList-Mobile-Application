@@ -49,8 +49,17 @@ fun MyLists(viewModel: TodoViewModel) {
     val sheetState = rememberModalBottomSheetState()
 
     val defaultCategories = listOf("All", "No Category", "Work", "Wishlist", "Birthday")
+
     var customCategories by remember { mutableStateOf(listOf<String>()) }
-    val allCategories = remember { derivedStateOf { defaultCategories + customCategories } }
+
+
+    //So even though customCategories is empty after restart, todoCategories rebuilds all used categories based on the saved Todos.
+    val allCategories = remember(todoList, customCategories) {
+        val todoCategories = todoList?.map { it.category }?.distinct().orEmpty()
+        val combined = (defaultCategories + customCategories + todoCategories).distinct()
+        derivedStateOf { combined }
+    }
+
     var selectedCategory by remember { mutableStateOf("All") }
 
 
