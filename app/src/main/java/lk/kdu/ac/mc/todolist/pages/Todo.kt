@@ -1,5 +1,7 @@
 //knowledge : https://www.youtube.com/watch?v=P3xQdINdrWY&list=PLgpnJydBcnPA5aNrlDxxKWSqAma7m3OIl&index=7
 //source : https://github.com/bimalkaf/JetpackCompose_Playground/tree/main/3_TodoApp
+//defining of roomdatabease entities and primary keys
+
 
 package lk.kdu.ac.mc.todolist.pages
 
@@ -17,7 +19,8 @@ data class Todo(
     var topic: String = "",
     var category: String = "No Category",
     var createdAt: Date = Date(),
-    var taskDate: Date? = null
+    var taskDate: Date? = null,
+    val userId: String = ""
 )
 
 

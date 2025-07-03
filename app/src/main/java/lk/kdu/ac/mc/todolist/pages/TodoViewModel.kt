@@ -22,18 +22,18 @@ import android.content.Context
 
 class TodoViewModel(context: Context) : ViewModel() {
 
-    val todoDao = MainApplication.todoDatabase.getTodoDao()
 
 
-    val todoList : LiveData<List<Todo>> = todoDao.getAllTodo()
+
+    val todoDao = MainApplication.todoDatabase.getTodoDao() //use roomdatabse in viewmodel for add,delete,update tasks
 
     val userEmail = Firebase.auth.currentUser?.email
-    val userId = userEmail?.replace(".", "_")  // Firebase paths can't use "."
-
+    val userId = userEmail?.replace(".", "_") ?: "guest"
+    val todoList: LiveData<List<Todo>> = todoDao.getAllTodo(userId)
 
 
     private val backupPreferences = BackupPreferences(context)
-    var isBackupEnabled = mutableStateOf(false)  // Add this at the top inside the ViewModel
+    var isBackupEnabled = mutableStateOf(false)
 
     init {
         viewModelScope.launch {
@@ -43,6 +43,8 @@ class TodoViewModel(context: Context) : ViewModel() {
         }
     }
 
+
+    // back up on and off button togglle
     fun toggleBackupEnabled() {
         viewModelScope.launch {
             val newValue = !isBackupEnabled.value
@@ -60,13 +62,14 @@ class TodoViewModel(context: Context) : ViewModel() {
                 topic = topic,
                 category = category,
                 taskDate = taskDate,
-                createdAt = Date.from(Instant.now())
+                createdAt = Date.from(Instant.now()),
+                userId = userId
             )
             todoDao.addTodo(newTodo)
 
-            // Auto backup if toggle is enabled
+            // Auto backup to firebase if toggle is on
             if (isBackupEnabled.value) {
-                val todos = todoDao.getAllTodoNow()  // You need to define this in TodoDao
+                val todos = todoDao.getAllTodoNow(userId)
                 backupTodosToFirebase(todos)
             }
         }
@@ -75,8 +78,9 @@ class TodoViewModel(context: Context) : ViewModel() {
     fun deleteTodo(id : Int){
         viewModelScope.launch(Dispatchers.IO) {
             todoDao.deleteTodo(id)
+            //delete from firebase if want to delete and if backup is turned on
             if (isBackupEnabled.value) {
-                val todos = todoDao.getAllTodoNow()
+                val todos = todoDao.getAllTodoNow(userId)
                 backupTodosToFirebase(todos)
             }
         }
@@ -85,15 +89,17 @@ class TodoViewModel(context: Context) : ViewModel() {
     fun updateTodo(todo: Todo) {
         viewModelScope.launch(Dispatchers.IO) {
             todoDao.updateTodo(todo.id, todo.title, todo.topic, todo.category, todo.taskDate)
+
+            //update firebase databse if backup is turned on
             if (isBackupEnabled.value) {
-                val todos = todoDao.getAllTodoNow()
+                val todos = todoDao.getAllTodoNow(userId)
                 backupTodosToFirebase(todos)
             }
         }
     }
 
 
-
+//backing up and resstoring data from firebase on sign in or signout
     fun backupTodosToFirebase(todos: List<Todo>) {
         val userId = Firebase.auth.currentUser?.email?.replace(".", "_") ?: return
         val dbRef = FirebaseDatabase.getInstance().getReference("users/$userId/todos")
@@ -116,10 +122,5 @@ class TodoViewModel(context: Context) : ViewModel() {
     fun insertTodoIfNotExists(todo: Todo) = viewModelScope.launch {
         todoDao.insertIfNotExists(todo)
     }
-
-
-
-
-
 
 }

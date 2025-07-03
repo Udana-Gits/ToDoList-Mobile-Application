@@ -1,4 +1,6 @@
 package lk.kdu.ac.mc.todolist.pages
+//show dates in a clender user have to do tasks in each month
+//chat gpt
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background

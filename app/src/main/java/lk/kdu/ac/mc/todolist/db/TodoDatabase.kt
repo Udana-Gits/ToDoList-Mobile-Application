@@ -7,14 +7,14 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import lk.kdu.ac.mc.todolist.pages.Todo
 
-@Database(entities = [Todo::class], version = 1)
-@TypeConverters(Converters::class)
-abstract class TodoDatabase : RoomDatabase(){
+@Database(entities = [Todo::class], version = 2, exportSchema = false)
+@TypeConverters(Converters::class) // apply converters to convert date
+abstract class TodoDatabase : RoomDatabase(){ // create roomdatabse named as tododatabase
 
     companion object {
         const val NAME = "Todo_DB"
     }
 
-    abstract fun getTodoDao() : TodoDao
+    abstract fun getTodoDao() : TodoDao // define tododao otherwise todoviewmodel cannot use it
 
 }
