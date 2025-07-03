@@ -3,6 +3,7 @@
 
 package lk.kdu.ac.mc.todolist.pages
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -20,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -31,6 +33,8 @@ import java.util.*
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyLists(viewModel: TodoViewModel) {
+
+    val context = LocalContext.current
 
     //to update existing tasks
     var editingTodo by remember { mutableStateOf<Todo?>(null) }
@@ -56,7 +60,7 @@ fun MyLists(viewModel: TodoViewModel) {
     //So even though customCategories is empty after restart, todoCategories rebuilds all used categories based on the saved Todos.
     val allCategories = remember(todoList, customCategories) {
         val todoCategories = todoList?.map { it.category }?.distinct().orEmpty()
-        val combined = (defaultCategories + customCategories + todoCategories).distinct()
+        val combined = (defaultCategories + customCategories + todoCategories).distinct()// <-- no duplication
         derivedStateOf { combined }
     }
 
@@ -65,11 +69,9 @@ fun MyLists(viewModel: TodoViewModel) {
 
 
 
-
-
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize().padding(8.dp)) {
-
+            //search box
             OutlinedTextField(
                 value = searchText,
                 onValueChange = { searchText = it },
@@ -92,7 +94,7 @@ fun MyLists(viewModel: TodoViewModel) {
                     )
                 }
             }
-            // Filter & Sort
+            // search text accoding to the inputting string & Sort(sort with task dates)
             val filteredList = todoList?.filter {
                 (selectedCategory == "All" || it.category == selectedCategory) &&
                         (it.title.contains(searchText, ignoreCase = true) || it.topic.contains(searchText, ignoreCase = true))
@@ -100,7 +102,7 @@ fun MyLists(viewModel: TodoViewModel) {
                 { it.taskDate?.after(Date()) != true },
                 { it.taskDate ?: Date(Long.MAX_VALUE) }
             )) ?: emptyList()
-
+            //show image of the filterd list is empty
             if (filteredList.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize()) {
                     Image(
@@ -108,7 +110,7 @@ fun MyLists(viewModel: TodoViewModel) {
                         contentDescription = "Empty tasks Image",
                         modifier = Modifier
                             .size(350.dp)
-                            .align(Alignment.Center) // Now this works correctly
+                            .align(Alignment.Center)
                     )
                 }
             } else {
@@ -140,7 +142,7 @@ fun MyLists(viewModel: TodoViewModel) {
         }
 
 
-
+        //bottom drewer pop from bottom used to add and edit tasks
         if (showSheet) {
             ModalBottomSheet(
                 onDismissRequest = { showSheet = false },
@@ -150,7 +152,7 @@ fun MyLists(viewModel: TodoViewModel) {
                 var expanded by remember { mutableStateOf(false) }
 
                 val datePickerState = rememberDatePickerState(
-                    initialSelectedDateMillis = editingTodo?.taskDate?.time
+                      initialSelectedDateMillis = editingTodo?.taskDate?.time
                 )
                 var showDatePicker by remember { mutableStateOf(false) }
                 var showNewCategoryDialog by remember { mutableStateOf(false) }
@@ -214,9 +216,15 @@ fun MyLists(viewModel: TodoViewModel) {
 
                     Spacer(modifier = Modifier.height(16.dp))
 
+                    //button to add and update (button update to avoid null inputs )
                     Button(
                         onClick = {
                             val taskDate = datePickerState.selectedDateMillis?.let { Date(it) }
+
+                            if (inputText.isBlank() || topicText.isBlank() || selectedBottomSheetCategory.isBlank() || taskDate == null) {
+                                Toast.makeText(context, "Please fill in all fields", Toast.LENGTH_SHORT).show()
+                                return@Button
+                            }
 
                             if (editingTodo != null) {
                                 viewModel.updateTodo(
@@ -227,7 +235,7 @@ fun MyLists(viewModel: TodoViewModel) {
                                         taskDate = taskDate
                                     )
                                 )
-                            } else if (inputText.isNotBlank()) {
+                            } else {
                                 viewModel.addTodo(
                                     inputText,
                                     topicText,
@@ -245,13 +253,12 @@ fun MyLists(viewModel: TodoViewModel) {
                                 sheetState.hide()
                                 showSheet = false
                             }
-                        }
-                        ,
+                        },
                         modifier = Modifier.align(Alignment.End)
                     ) {
-                        //change button accoding to the update or add (chatgpt)
                         Text(if (editingTodo != null) "Update" else "Add")
                     }
+
                 }
 
                 if (showNewCategoryDialog) {

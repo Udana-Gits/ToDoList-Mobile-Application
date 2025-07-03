@@ -1,3 +1,7 @@
+//The BackupPreferences class in your app is used to store and retrieve the
+// user’s preference for whether backup to Firebase is enabled or disabled.
+//chat gpt
+
 package lk.kdu.ac.mc.todolist.pages
 
 import android.content.Context

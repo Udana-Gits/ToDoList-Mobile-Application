@@ -12,7 +12,13 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import lk.kdu.ac.mc.todolist.R
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
+import lk.kdu.ac.mc.todolist.MainApplication
+import lk.kdu.ac.mc.todolist.pages.TodoViewModel
 
 class GoogleAuthUiClient(
     private val context: Context,
@@ -39,6 +45,11 @@ class GoogleAuthUiClient(
         val googleCredentials = GoogleAuthProvider.getCredential(googleIdToken, null)
         return try {
             val user = auth.signInWithCredential(googleCredentials).await().user
+
+            // Restore todos from Firebase to Room when sign in
+            val viewModel = TodoViewModel(context)
+            viewModel.restoreTodosFromFirebase()
+
             SignInResult(
                 data = user?.run {
                     UserData(
@@ -59,13 +70,22 @@ class GoogleAuthUiClient(
         }
     }
 
+
     suspend fun signOut() {
         try {
+            // 1. Clear Room database before sign out
+            val todoDao = MainApplication.todoDatabase.getTodoDao()
+            withContext(Dispatchers.IO) {
+                todoDao.clearAllTodos()
+            }
+
+            // 2. Sign out from Firebase & OneTap
             oneTapClient.signOut().await()
             auth.signOut()
-        } catch(e: Exception) {
+
+        } catch (e: Exception) {
             e.printStackTrace()
-            if(e is CancellationException) throw e
+            if (e is CancellationException) throw e
         }
     }
 

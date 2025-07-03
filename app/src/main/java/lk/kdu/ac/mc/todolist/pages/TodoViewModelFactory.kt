@@ -1,4 +1,4 @@
-//The crash you're seeing is because TodoViewModel requires a Context in its constructor, but you're trying to retrieve it like a regular ViewModel using:
+//The crash  seeing is because TodoViewModel requires a Context in its constructor, but you're trying to retrieve it like a regular ViewModel using:
 //val todoViewModel: TodoViewModel = viewModel()
 //This only works for parameterless ViewModels. Since yours now takes a parameter (Context), you must use a ViewModelProvider.Factory to create it properly
 

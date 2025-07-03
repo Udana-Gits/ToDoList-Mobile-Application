@@ -1,5 +1,8 @@
 //knowlage :https://www.youtube.com/watch?v=sWOmlDvz_3U&list=PLgpnJydBcnPA5aNrlDxxKWSqAma7m3OIl&index=8 , chatGpt Debugging
 //source : https://github.com/bimalkaf/JetpackCompose_Playground/tree/main/4_TodoApp_RoomDB
+//Room doesn’t know how to save Date objects by default so convert it
+
+//Type Converters
 
 package lk.kdu.ac.mc.todolist.db
 
